@@ -1,8 +1,9 @@
 package main
 
 import (
-	"github.com/google/uuid"
 	"time"
+
+	"github.com/google/uuid"
 )
 
 type Severity string
@@ -22,8 +23,8 @@ type ErrorAggregate struct {
 
 type ErrorWithContext struct {
 	Error       ErrorInstance `json:"error"`
-	UUID        uuid.UUID        `json:"uuid"`
-	Timestamp   int64         `json:"timestamp"`
+	UUID        uuid.UUID     `json:"uuid"`
+	Timestamp   time.Time     `json:"timestamp"`
 	Severity    Severity      `json:"severity"`
 	HTTPContext HTTPContext   `json:"http_context"`
 }
@@ -43,17 +44,17 @@ type HTTPContext struct {
 
 func NewErrorInstance(err *error, stacktrace []string) ErrorInstance {
 	return ErrorInstance{
-		Cause: err,
+		Cause:      err,
 		Stacktrace: stacktrace,
 	}
 }
 
-func NewErrorWithContext(errorInstance ErrorInstance, severity Severity) ErrorWithContext {
+func NewErrorWithContext(errorInstance ErrorInstance, severity Severity, httpCtx HTTPContext) ErrorWithContext {
 	return ErrorWithContext{
-		Error: errorInstance,
-		UUID: uuid.New(),
-		Timestamp: time.Now().Unix(),
-		Severity: severity,
-		HTTPContext: HTTPContext{},
+		Error:       errorInstance,
+		UUID:        uuid.New(),
+		Timestamp:   time.Now().UTC(),
+		Severity:    severity,
+		HTTPContext: httpCtx,
 	}
 }
