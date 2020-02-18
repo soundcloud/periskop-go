@@ -33,7 +33,7 @@ type ErrorInstance struct {
 	Class      string   `json:"class"`
 	Message    string   `json:"message"`
 	Stacktrace []string `json:"stacktrace"`
-	Cause      *error   `json:"cause"`
+	Cause      error    `json:"cause"`
 }
 
 type HTTPContext struct {
@@ -42,7 +42,7 @@ type HTTPContext struct {
 	RequestHeaders map[string]string `json:"request_headers"`
 }
 
-func NewErrorInstance(err *error, stacktrace []string) ErrorInstance {
+func NewErrorInstance(err error, stacktrace []string) ErrorInstance {
 	return ErrorInstance{
 		Cause:      err,
 		Stacktrace: stacktrace,

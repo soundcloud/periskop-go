@@ -9,13 +9,13 @@ import (
 func TestCollector_Report(t *testing.T) {
 	c := Collector{}
 	err := errors.New("testing")
-	c.Report(&err.Err)
+	c.Report(err.Err)
 
 	if len(c.exceptions) != 1 {
 		t.Errorf("expected one element")
 	}
 
-	if c.exceptions[0].Error.Cause != &err.Err {
+	if c.exceptions[0].Error.Cause != err.Err {
 		t.Errorf("expected a propagated error")
 	}
 
@@ -32,7 +32,7 @@ func TestCollector_ReportWithContext(t *testing.T) {
 		RequestURL:     "http://example.com",
 		RequestHeaders: map[string]string{"Cache-Control": "no-cache"},
 	}
-	c.ReportWithContext(&err.Err, httpContext)
+	c.ReportWithContext(err.Err, httpContext)
 
 	if len(c.exceptions) != 1 {
 		t.Errorf("expected one element")
