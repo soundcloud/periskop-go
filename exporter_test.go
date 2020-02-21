@@ -33,7 +33,8 @@ func TestExporter_Export(t *testing.T) {
 	uuid, _ := uuid.Parse("5d9893c6-51d6-11ea-8aad-f894c260afe5")
 	exception := ErrorWithContext{
 		Error: ErrorInstance{
-			Cause:      errors.New("testing").Err,
+			Cause:      errors.New("testing").Err.Error(),
+			Class:      errors.New("testing").Err.Error(),
 			Stacktrace: []string{"line 12:", "syntax error"},
 		},
 		UUID:      uuid,
@@ -48,7 +49,7 @@ func TestExporter_Export(t *testing.T) {
 	var expected = `[
 		{
 		  "error": {
-			"class": "",
+			"class": "testing",
 			"message": "",
 			"stacktrace": [
 			  "line 12:",

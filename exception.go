@@ -1,6 +1,9 @@
 package main
 
 import (
+	"fmt"
+	"hash/fnv"
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -12,6 +15,7 @@ const (
 	SeverityInfo    Severity = "info"
 	SeverityWarning Severity = "warning"
 	SeverityError   Severity = "error"
+	maxTraces                = 5
 )
 
 type ErrorAggregate struct {
@@ -33,7 +37,7 @@ type ErrorInstance struct {
 	Class      string   `json:"class"`
 	Message    string   `json:"message"`
 	Stacktrace []string `json:"stacktrace"`
-	Cause      error    `json:"cause"`
+	Cause      string   `json:"cause"`
 }
 
 type HTTPContext struct {
@@ -44,7 +48,8 @@ type HTTPContext struct {
 
 func NewErrorInstance(err error, stacktrace []string) ErrorInstance {
 	return ErrorInstance{
-		Cause:      err,
+		Cause:      err.Error(),
+		Class:      err.Error(),
 		Stacktrace: stacktrace,
 	}
 }
@@ -57,4 +62,19 @@ func NewErrorWithContext(errorInstance ErrorInstance, severity Severity, httpCtx
 		Severity:    severity,
 		HTTPContext: httpCtx,
 	}
+}
+
+func hash(s string) string {
+	h := fnv.New32a()
+	h.Write([]byte(s))
+	return fmt.Sprintf("%x", h.Sum32())
+}
+
+func (e *ErrorWithContext) aggregationKey() string {
+	stacktraceHead := e.Error.Stacktrace
+	if len(e.Error.Stacktrace) > maxTraces {
+		stacktraceHead = stacktraceHead[:maxTraces]
+	}
+	stacktraceHeadHash := hash(strings.Join(stacktraceHead[:], ""))
+	return fmt.Sprintf("%s@%s", e.Error.Class, stacktraceHeadHash)
 }
