@@ -15,7 +15,7 @@ func TestCollector_Report(t *testing.T) {
 		t.Errorf("expected one element")
 	}
 
-	if c.exceptions[0].Error.Cause != err.Err {
+	if c.exceptions[0].Error.Cause != err.Err.Error() {
 		t.Errorf("expected a propagated error")
 	}
 
