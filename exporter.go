@@ -15,7 +15,7 @@ func NewExporter(collector *Collector) Exporter {
 }
 
 func (e *Exporter) Export() (string, error) {
-	res, err := json.MarshalIndent(e.collector.exceptions, "", "  ")
+	res, err := json.Marshal(e.collector.getExceptionAggregate())
 	if err != nil {
 		return "", err
 	}

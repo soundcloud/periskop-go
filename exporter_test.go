@@ -29,9 +29,9 @@ func compareJSON(json0, json1 string) (bool, error) {
 }
 
 func TestExporter_Export(t *testing.T) {
-	c := Collector{}
+	c := NewCollector()
 	uuid, _ := uuid.Parse("5d9893c6-51d6-11ea-8aad-f894c260afe5")
-	exception := ErrorWithContext{
+	errorWithContext := ErrorWithContext{
 		Error: ErrorInstance{
 			Cause:      errors.New("testing").Err.Error(),
 			Class:      errors.New("testing").Err.Error(),
@@ -46,30 +46,46 @@ func TestExporter_Export(t *testing.T) {
 			RequestHeaders: map[string]string{"Cache-Control": "no-cache"},
 		},
 	}
-	var expected = `[
-		{
-		  "error": {
-			"class": "testing",
-			"message": "",
-			"stacktrace": [
-			  "line 12:",
-			  "syntax error"
-			],
-			"cause": "testing"
-		  },
-		  "uuid": "5d9893c6-51d6-11ea-8aad-f894c260afe5",
-		  "timestamp": "2020-02-17T22:42:45Z",
-		  "severity": "error",
-		  "http_context": {
-			"request_method": "GET",
-			"request_url": "http://example.com",
-			"request_headers": {
-			  "Cache-Control": "no-cache"
-			}
+
+	errorAggregate := ErrorAggregate{
+		AggregationKey: "test",
+		TotalCount:     1,
+		Severity:       SeverityError,
+		LatestErrors:   []ErrorWithContext{errorWithContext},
+	}
+	var expected = `{
+		"aggregated_errors":[
+		  {
+			"aggregation_key":"test",
+			"total_count":1,
+			"severity":"error",
+			"latest_errors":[
+			  {
+				"error":{
+				  "class":"testing",
+				  "message":"",
+				  "stacktrace":[
+					"line 12:",
+					"syntax error"
+				  ],
+				  "cause":"testing"
+				},
+				"uuid":"5d9893c6-51d6-11ea-8aad-f894c260afe5",
+				"timestamp":"2020-02-17T22:42:45Z",
+				"severity":"error",
+				"http_context":{
+				  "request_method":"GET",
+				  "request_url":"http://example.com",
+				  "request_headers":{
+					"Cache-Control":"no-cache"
+				  }
+				}
+			  }
+			]
 		  }
-		}
-	  ]`
-	c.exceptions = append(c.exceptions, exception)
+		]
+	  }`
+	c.exceptions["test"] = errorAggregate
 	e := NewExporter(&c)
 	data, err := e.Export()
 	if err != nil {

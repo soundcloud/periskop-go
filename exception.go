@@ -16,13 +16,35 @@ const (
 	SeverityWarning Severity = "warning"
 	SeverityError   Severity = "error"
 	maxTraces                = 5
+	maxExceptions            = 10
 )
+
+type ExceptionAggregate struct {
+	ErrorAggregates []ErrorAggregate `json:"aggregated_errors"`
+}
 
 type ErrorAggregate struct {
 	AggregationKey string             `json:"aggregation_key"`
 	TotalCount     int                `json:"total_count"`
-	Severity       string             `json:"severity"`
+	Severity       Severity           `json:"severity"`
 	LatestErrors   []ErrorWithContext `json:"latest_errors"`
+}
+
+func NewErrorAggregate(aggregationKey string, severity Severity) ErrorAggregate {
+	return ErrorAggregate{
+		AggregationKey: aggregationKey,
+		TotalCount:     1,
+		Severity:       severity,
+	}
+}
+
+func (e *ErrorAggregate) addError(errorWithContext ErrorWithContext) {
+	if len(e.LatestErrors) > maxExceptions {
+		// dequeue
+		e.LatestErrors = e.LatestErrors[1:]
+	}
+	e.LatestErrors = append(e.LatestErrors, errorWithContext)
+	e.TotalCount++
 }
 
 type ErrorWithContext struct {

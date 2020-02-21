@@ -6,8 +6,30 @@ import (
 	"github.com/go-errors/errors"
 )
 
+func getErrorAggregate(exceptions map[string]ErrorAggregate) ErrorAggregate {
+	for _, errorAggregate := range exceptions {
+		return errorAggregate
+	}
+	return ErrorAggregate{}
+}
+
+func TestCollector_addError(t *testing.T) {
+	c := NewCollector()
+	err := errors.New("testing")
+	c.addError(err, HTTPContext{})
+
+	if len(c.exceptions) != 1 {
+		t.Errorf("expected one element")
+	}
+
+	c.addError(err, HTTPContext{})
+	if len(c.exceptions) != 2 {
+		t.Errorf("expected two element")
+	}
+}
+
 func TestCollector_Report(t *testing.T) {
-	c := Collector{}
+	c := NewCollector()
 	err := errors.New("testing")
 	c.Report(err.Err)
 
@@ -15,17 +37,18 @@ func TestCollector_Report(t *testing.T) {
 		t.Errorf("expected one element")
 	}
 
-	if c.exceptions[0].Error.Cause != err.Err.Error() {
+	errorWithContext := getErrorAggregate(c.exceptions).LatestErrors[0]
+	if errorWithContext.Error.Cause != err.Err.Error() {
 		t.Errorf("expected a propagated error")
 	}
 
-	if len(c.exceptions[0].Error.Stacktrace) == 0 {
+	if len(errorWithContext.Error.Stacktrace) == 0 {
 		t.Errorf("expected a collected stack trace")
 	}
 }
 
 func TestCollector_ReportWithContext(t *testing.T) {
-	c := Collector{}
+	c := NewCollector()
 	err := errors.New("testing")
 	httpContext := HTTPContext{
 		RequestMethod:  "GET",
@@ -38,7 +61,8 @@ func TestCollector_ReportWithContext(t *testing.T) {
 		t.Errorf("expected one element")
 	}
 
-	if c.exceptions[0].HTTPContext.RequestMethod != "GET" {
+	errorWithContext := getErrorAggregate(c.exceptions).LatestErrors[0]
+	if errorWithContext.HTTPContext.RequestMethod != "GET" {
 		t.Errorf("expected HTTP method GET")
 	}
 }
