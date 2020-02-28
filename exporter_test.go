@@ -29,7 +29,7 @@ func compareJSON(json0, json1 string) (bool, error) {
 }
 
 func TestExporter_Export(t *testing.T) {
-	c := NewCollector()
+	c := NewErrorCollector()
 	uuid, _ := uuid.Parse("5d9893c6-51d6-11ea-8aad-f894c260afe5")
 	errorWithContext := ErrorWithContext{
 		Error: ErrorInstance{
@@ -47,7 +47,7 @@ func TestExporter_Export(t *testing.T) {
 		},
 	}
 
-	errorAggregate := ErrorAggregate{
+	errorAggregate := AggregatedError{
 		AggregationKey: "test",
 		TotalCount:     1,
 		Severity:       SeverityError,
@@ -85,8 +85,8 @@ func TestExporter_Export(t *testing.T) {
 		  }
 		]
 	  }`
-	c.exceptions["test"] = errorAggregate
-	e := NewExporter(&c)
+	c.aggregatedErrors["test"] = errorAggregate
+	e := NewErrorExporter(&c)
 	data, err := e.Export()
 	if err != nil {
 		t.Errorf("error exporting exceptions: %v", err)

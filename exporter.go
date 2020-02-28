@@ -4,18 +4,18 @@ import (
 	"encoding/json"
 )
 
-type Exporter struct {
-	collector *Collector
+type ErrorExporter struct {
+	collector *ErrorCollector
 }
 
-func NewExporter(collector *Collector) Exporter {
-	return Exporter{
+func NewErrorExporter(collector *ErrorCollector) ErrorExporter {
+	return ErrorExporter{
 		collector: collector,
 	}
 }
 
-func (e *Exporter) Export() (string, error) {
-	res, err := json.Marshal(e.collector.getExceptionAggregate())
+func (e *ErrorExporter) Export() (string, error) {
+	res, err := json.Marshal(e.collector.getAggregatedErrors())
 	if err != nil {
 		return "", err
 	}

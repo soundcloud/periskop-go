@@ -6,46 +6,50 @@ import (
 	"github.com/go-errors/errors"
 )
 
-type Collector struct {
-	exceptions map[string]ErrorAggregate
+// ErrorCollector collects all the aggregated errors
+type ErrorCollector struct {
+	aggregatedErrors map[string]AggregatedError
 }
 
-func NewCollector() Collector {
-	return Collector{
-		exceptions: make(map[string]ErrorAggregate),
+// NewErrorCollector creates new ErrorCollector
+func NewErrorCollector() ErrorCollector {
+	return ErrorCollector{
+		aggregatedErrors: make(map[string]AggregatedError),
 	}
+}
+
+// Report is used to add an error to map of aggregated errors
+func (c *ErrorCollector) Report(err error) {
+	c.addError(err, HTTPContext{})
+}
+
+// ReportWithContext is used to add an error (with HTTPContext) to map of aggregated errors
+func (c *ErrorCollector) ReportWithContext(err error, httpCtx HTTPContext) {
+	c.addError(err, httpCtx)
 }
 
 func getStackTrace(err error) []string {
 	e := errors.New(err)
-	trace := string(e.Stack())
+	trace := string(e.ErrorStack())
 	return strings.Split(trace, "\n")
 }
 
-func (c *Collector) Report(err error) {
-	c.addError(err, HTTPContext{})
-}
-
-func (c *Collector) ReportWithContext(err error, httpCtx HTTPContext) {
-	c.addError(err, httpCtx)
-}
-
-func (c *Collector) getExceptionAggregate() ExceptionAggregate {
-	var errorAggregates []ErrorAggregate
-	for _, errorAggregate := range c.exceptions {
-		errorAggregates = append(errorAggregates, errorAggregate)
+func (c *ErrorCollector) getAggregatedErrors() PeriskopResponse {
+	var aggregatedErrors []AggregatedError
+	for _, aggregateError := range c.aggregatedErrors {
+		aggregatedErrors = append(aggregatedErrors, aggregateError)
 	}
-	return ExceptionAggregate{ErrorAggregates: errorAggregates}
+	return PeriskopResponse{AggregatedErrors: aggregatedErrors}
 }
 
-func (c *Collector) addError(err error, httpCtx HTTPContext) {
+func (c *ErrorCollector) addError(err error, httpCtx HTTPContext) {
 	errorInstance := NewErrorInstance(err, getStackTrace(err))
 	errorWithContext := NewErrorWithContext(errorInstance, SeverityError, httpCtx)
-	if errorAggregate, ok := c.exceptions[errorWithContext.aggregationKey()]; ok {
-		errorAggregate.addError(errorWithContext)
+	if aggregatedError, ok := c.aggregatedErrors[errorWithContext.aggregationKey()]; ok {
+		aggregatedError.addError(errorWithContext)
 	} else {
-		errorAggregate = NewErrorAggregate(errorWithContext.aggregationKey(), SeverityError)
-		errorAggregate.addError(errorWithContext)
-		c.exceptions[errorWithContext.aggregationKey()] = errorAggregate
+		aggregatedError = NewErrorAggregate(errorWithContext.aggregationKey(), SeverityError)
+		aggregatedError.addError(errorWithContext)
+		c.aggregatedErrors[errorWithContext.aggregationKey()] = aggregatedError
 	}
 }

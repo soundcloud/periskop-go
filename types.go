@@ -15,31 +15,31 @@ const (
 	SeverityInfo    Severity = "info"
 	SeverityWarning Severity = "warning"
 	SeverityError   Severity = "error"
-	maxTraces                = 5
-	maxExceptions            = 10
+	maxTraces                = 1
+	maxErrors                = 10
 )
 
-type ExceptionAggregate struct {
-	ErrorAggregates []ErrorAggregate `json:"aggregated_errors"`
+type PeriskopResponse struct {
+	AggregatedErrors []AggregatedError `json:"aggregated_errors"`
 }
 
-type ErrorAggregate struct {
+type AggregatedError struct {
 	AggregationKey string             `json:"aggregation_key"`
 	TotalCount     int                `json:"total_count"`
 	Severity       Severity           `json:"severity"`
 	LatestErrors   []ErrorWithContext `json:"latest_errors"`
 }
 
-func NewErrorAggregate(aggregationKey string, severity Severity) ErrorAggregate {
-	return ErrorAggregate{
+func NewErrorAggregate(aggregationKey string, severity Severity) AggregatedError {
+	return AggregatedError{
 		AggregationKey: aggregationKey,
-		TotalCount:     1,
+		TotalCount:     0,
 		Severity:       severity,
 	}
 }
 
-func (e *ErrorAggregate) addError(errorWithContext ErrorWithContext) {
-	if len(e.LatestErrors) > maxExceptions {
+func (e *AggregatedError) addError(errorWithContext ErrorWithContext) {
+	if len(e.LatestErrors) > maxErrors {
 		// dequeue
 		e.LatestErrors = e.LatestErrors[1:]
 	}
