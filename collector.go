@@ -1,20 +1,21 @@
 package main
 
 import (
+	"fmt"
 	"strings"
 
-	"github.com/go-errors/errors"
+	"github.com/soundcloud/periskop-go/stackframes"
 )
 
 // ErrorCollector collects all the aggregated errors
 type ErrorCollector struct {
-	aggregatedErrors map[string]AggregatedError
+	aggregatedErrors map[string]*AggregatedError
 }
 
 // NewErrorCollector creates new ErrorCollector
 func NewErrorCollector() ErrorCollector {
 	return ErrorCollector{
-		aggregatedErrors: make(map[string]AggregatedError),
+		aggregatedErrors: make(map[string]*AggregatedError),
 	}
 }
 
@@ -28,16 +29,21 @@ func (c *ErrorCollector) ReportWithContext(err error, httpCtx HTTPContext) {
 	c.addError(err, httpCtx)
 }
 
+//func removeHexFromStack(stack []byte)
+
 func getStackTrace(err error) []string {
-	e := errors.New(err)
-	trace := string(e.ErrorStack())
-	return strings.Split(trace, "\n")
+	e := stackframes.New(err)
+	trace := string(e.Stack())
+	//fmt.Println(e.StackFrames())
+	s := strings.Split(trace, "\n")
+	//fmt.Println(s)
+	return s
 }
 
 func (c *ErrorCollector) getAggregatedErrors() PeriskopResponse {
 	var aggregatedErrors []AggregatedError
 	for _, aggregateError := range c.aggregatedErrors {
-		aggregatedErrors = append(aggregatedErrors, aggregateError)
+		aggregatedErrors = append(aggregatedErrors, *aggregateError)
 	}
 	return PeriskopResponse{AggregatedErrors: aggregatedErrors}
 }
@@ -45,11 +51,12 @@ func (c *ErrorCollector) getAggregatedErrors() PeriskopResponse {
 func (c *ErrorCollector) addError(err error, httpCtx HTTPContext) {
 	errorInstance := NewErrorInstance(err, getStackTrace(err))
 	errorWithContext := NewErrorWithContext(errorInstance, SeverityError, httpCtx)
+	fmt.Println(errorWithContext.aggregationKey())
 	if aggregatedError, ok := c.aggregatedErrors[errorWithContext.aggregationKey()]; ok {
 		aggregatedError.addError(errorWithContext)
 	} else {
-		aggregatedError = NewErrorAggregate(errorWithContext.aggregationKey(), SeverityError)
+		aggregatedError := NewErrorAggregate(errorWithContext.aggregationKey(), SeverityError)
 		aggregatedError.addError(errorWithContext)
-		c.aggregatedErrors[errorWithContext.aggregationKey()] = aggregatedError
+		c.aggregatedErrors[errorWithContext.aggregationKey()] = &aggregatedError
 	}
 }

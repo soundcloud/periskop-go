@@ -16,15 +16,37 @@ var aggregationKeyCases = []struct {
 	{"testingError@9b5eca82", []string{"line 0:", "division by zero", "line 1:", "test()", "line 5:", "checkTest()"}},
 }
 
-func TestException_aggregationKey(t *testing.T) {
+func newMockErrorWithContext(stacktrace []string) ErrorWithContext {
+	errorInstance := NewErrorInstance(errors.New("testingError"), stacktrace)
+	return NewErrorWithContext(errorInstance, SeverityError, HTTPContext{})
+}
+
+func TestTypes_aggregationKey(t *testing.T) {
 	for _, tt := range aggregationKeyCases {
 		t.Run(tt.expectedAggregationKey, func(t *testing.T) {
-			errorInstance := NewErrorInstance(errors.New("testingError"), tt.stacktrace)
-			errorInstanceWithContext := NewErrorWithContext(errorInstance, SeverityError, HTTPContext{})
-			resultAggregationKey := errorInstanceWithContext.aggregationKey()
+			errorWithContext := newMockErrorWithContext(tt.stacktrace)
+			resultAggregationKey := errorWithContext.aggregationKey()
 			if resultAggregationKey != tt.expectedAggregationKey {
 				t.Errorf("error in aggregationKey, expected: %s, got %s", tt.expectedAggregationKey, resultAggregationKey)
 			}
 		})
+	}
+}
+
+func TestTypes_addError(t *testing.T) {
+	errorWithContext := newMockErrorWithContext([]string{""})
+	errorAggregate := NewErrorAggregate("error@hash", SeverityWarning)
+	errorAggregate.addError(errorWithContext)
+	if errorAggregate.TotalCount != 1 {
+		t.Errorf("expected one error")
+	}
+	for i := 0; i < MaxErrors; i++ {
+		errorAggregate.addError(errorWithContext)
+	}
+	if errorAggregate.TotalCount != MaxErrors+1 {
+		t.Errorf("expected %v total errors", MaxErrors+1)
+	}
+	if len(errorAggregate.LatestErrors) != MaxErrors {
+		t.Errorf("expected %v latest errors", MaxErrors)
 	}
 }

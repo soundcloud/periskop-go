@@ -9,14 +9,15 @@ import (
 	"github.com/google/uuid"
 )
 
+// Severity is the definition of different severities
 type Severity string
 
 const (
 	SeverityInfo    Severity = "info"
 	SeverityWarning Severity = "warning"
 	SeverityError   Severity = "error"
-	maxTraces                = 1
-	maxErrors                = 10
+	MaxTraces       int      = 5
+	MaxErrors       int      = 10
 )
 
 type PeriskopResponse struct {
@@ -39,7 +40,7 @@ func NewErrorAggregate(aggregationKey string, severity Severity) AggregatedError
 }
 
 func (e *AggregatedError) addError(errorWithContext ErrorWithContext) {
-	if len(e.LatestErrors) > maxErrors {
+	if len(e.LatestErrors) >= MaxErrors {
 		// dequeue
 		e.LatestErrors = e.LatestErrors[1:]
 	}
@@ -94,8 +95,8 @@ func hash(s string) string {
 
 func (e *ErrorWithContext) aggregationKey() string {
 	stacktraceHead := e.Error.Stacktrace
-	if len(e.Error.Stacktrace) > maxTraces {
-		stacktraceHead = stacktraceHead[:maxTraces]
+	if len(e.Error.Stacktrace) > MaxTraces {
+		stacktraceHead = stacktraceHead[:MaxTraces]
 	}
 	stacktraceHeadHash := hash(strings.Join(stacktraceHead[:], ""))
 	return fmt.Sprintf("%s@%s", e.Error.Class, stacktraceHeadHash)

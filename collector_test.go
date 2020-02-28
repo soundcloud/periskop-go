@@ -6,11 +6,11 @@ import (
 	"github.com/go-errors/errors"
 )
 
-func getErrorAggregate(exceptions map[string]AggregatedError) AggregatedError {
-	for _, errorAggregate := range exceptions {
-		return errorAggregate
+func getErrorAggregate(aggregatedErrors map[string]*AggregatedError) *AggregatedError {
+	for _, aggregatedError := range aggregatedErrors {
+		return aggregatedError
 	}
-	return AggregatedError{}
+	return &AggregatedError{}
 }
 
 func TestCollector_addError(t *testing.T) {
@@ -23,8 +23,8 @@ func TestCollector_addError(t *testing.T) {
 	}
 
 	c.addError(err, HTTPContext{})
-	if len(c.aggregatedErrors) != 2 {
-		t.Errorf("expected two element")
+	if getErrorAggregate(c.aggregatedErrors).TotalCount != 2 {
+		t.Errorf("expected two elements")
 	}
 }
 
