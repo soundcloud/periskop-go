@@ -39,5 +39,5 @@ func main() {
 	h := periskop.NewHandler(e)
 	http.Handle("/exceptions", h)
 	http.ListenAndServe(":8080", nil)
-
+}
 ```

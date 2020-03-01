@@ -16,7 +16,7 @@ const (
 	SeverityInfo    Severity = "info"
 	SeverityWarning Severity = "warning"
 	SeverityError   Severity = "error"
-	MaxTraces       int      = 5
+	MaxTraces       int      = 4
 	MaxErrors       int      = 10
 )
 

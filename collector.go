@@ -1,7 +1,6 @@
 package periskop
 
 import (
-	"fmt"
 	"strings"
 
 	"github.com/soundcloud/periskop-go/errutils"
@@ -47,12 +46,12 @@ func (c *ErrorCollector) getAggregatedErrors() PeriskopResponse {
 func (c *ErrorCollector) addError(err error, httpCtx HTTPContext) {
 	errorInstance := NewErrorInstance(err, getStackTrace(err))
 	errorWithContext := NewErrorWithContext(errorInstance, SeverityError, httpCtx)
-	fmt.Println(errorWithContext.aggregationKey())
-	if aggregatedError, ok := c.aggregatedErrors[errorWithContext.aggregationKey()]; ok {
+	aggregationKey := errorWithContext.aggregationKey()
+	if aggregatedError, ok := c.aggregatedErrors[aggregationKey]; ok {
 		aggregatedError.addError(errorWithContext)
 	} else {
-		aggregatedError := NewErrorAggregate(errorWithContext.aggregationKey(), SeverityError)
+		aggregatedError := NewErrorAggregate(aggregationKey, SeverityError)
 		aggregatedError.addError(errorWithContext)
-		c.aggregatedErrors[errorWithContext.aggregationKey()] = &aggregatedError
+		c.aggregatedErrors[aggregationKey] = &aggregatedError
 	}
 }

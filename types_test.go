@@ -11,8 +11,8 @@ var aggregationKeyCases = []struct {
 }{
 	{"testingError@811c9dc5", []string{""}},
 	{"testingError@8de5e669", []string{"line 0:", "division by zero"}},
-	{"testingError@9d610c3f", []string{"line 0:", "division by zero", "line 1:", "test()", "line 4:", "checkTest()"}},
-	{"testingError@9b5eca82", []string{"line 0:", "division by zero", "line 1:", "test()", "line 5:", "checkTest()"}},
+	{"testingError@203345ae", []string{"line 0:", "division by zero", "line 1:", "line 4:", "checkTest()"}},
+	{"testingError@2235876b", []string{"line 0:", "division by zero", "line 1:", "line 5:", "checkTest()"}},
 }
 
 func newMockErrorWithContext(stacktrace []string) ErrorWithContext {

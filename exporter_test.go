@@ -97,6 +97,6 @@ func TestExporter_Export(t *testing.T) {
 		t.Errorf("error exporting exceptions: %v", err)
 	}
 	if !areEqual {
-		t.Errorf("data did not match:\nexpected: %s\ngot: %s", expected, data))
+		t.Errorf("data did not match:\nexpected: %s\ngot: %s", expected, data)
 	}
 }
