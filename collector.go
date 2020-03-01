@@ -35,12 +35,12 @@ func getStackTrace(err error) []string {
 	return s
 }
 
-func (c *ErrorCollector) getAggregatedErrors() PeriskopResponse {
-	var aggregatedErrors []AggregatedError
+func (c *ErrorCollector) getAggregatedErrors() Payload {
+	aggregatedErrors := make([]AggregatedError, 0)
 	for _, aggregateError := range c.aggregatedErrors {
 		aggregatedErrors = append(aggregatedErrors, *aggregateError)
 	}
-	return PeriskopResponse{AggregatedErrors: aggregatedErrors}
+	return Payload{AggregatedErrors: aggregatedErrors}
 }
 
 func (c *ErrorCollector) addError(err error, httpCtx HTTPContext) {

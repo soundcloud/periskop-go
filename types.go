@@ -20,7 +20,7 @@ const (
 	MaxErrors       int      = 10
 )
 
-type PeriskopResponse struct {
+type Payload struct {
 	AggregatedErrors []AggregatedError `json:"aggregated_errors"`
 }
 
@@ -89,7 +89,10 @@ func NewErrorWithContext(errorInstance ErrorInstance, severity Severity, httpCtx
 
 func hash(s string) string {
 	h := fnv.New32a()
-	h.Write([]byte(s))
+	_, err := h.Write([]byte(s))
+	if err != nil {
+		fmt.Printf("error hashing string '%s': %s\n", s, err)
+	}
 	return fmt.Sprintf("%x", h.Sum32())
 }
 
@@ -98,6 +101,6 @@ func (e *ErrorWithContext) aggregationKey() string {
 	if len(e.Error.Stacktrace) > MaxTraces {
 		stacktraceHead = stacktraceHead[:MaxTraces]
 	}
-	stacktraceHeadHash := hash(strings.Join(stacktraceHead[:], ""))
+	stacktraceHeadHash := hash(strings.Join(stacktraceHead, ""))
 	return fmt.Sprintf("%s@%s", e.Error.Class, stacktraceHeadHash)
 }

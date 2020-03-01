@@ -9,10 +9,13 @@ import (
 // a handler with the exported errors in json format
 func NewHandler(e ErrorExporter) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
-		j, err := e.Export()
+		json, err := e.Export()
 		if err != nil {
-			fmt.Printf("error exporting Periskop errors %s", err)
+			fmt.Printf("error exporting Periskop errors: %s\n", err)
 		}
-		w.Write([]byte(j))
+		_, err = w.Write([]byte(json))
+		if err != nil {
+			fmt.Printf("error writing Periskop errors: %s\n", err)
+		}
 	})
 }
