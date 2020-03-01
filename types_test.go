@@ -15,9 +15,9 @@ var aggregationKeyCases = []struct {
 	{"testingError@2235876b", []string{"line 0:", "division by zero", "line 1:", "line 5:", "checkTest()"}},
 }
 
-func newMockErrorWithContext(stacktrace []string) ErrorWithContext {
-	errorInstance := NewErrorInstance(errors.New("testingError"), stacktrace)
-	return NewErrorWithContext(errorInstance, SeverityError, HTTPContext{})
+func newMockErrorWithContext(stacktrace []string) errorWithContext {
+	errorInstance := newErrorInstance(errors.New("testingError"), stacktrace)
+	return newErrorWithContext(errorInstance, SeverityError, HTTPContext{})
 }
 
 func TestTypes_aggregationKey(t *testing.T) {
@@ -34,7 +34,7 @@ func TestTypes_aggregationKey(t *testing.T) {
 
 func TestTypes_addError(t *testing.T) {
 	errorWithContext := newMockErrorWithContext([]string{""})
-	errorAggregate := NewErrorAggregate("error@hash", SeverityWarning)
+	errorAggregate := newErrorAggregate("error@hash", SeverityWarning)
 	errorAggregate.addError(errorWithContext)
 	if errorAggregate.TotalCount != 1 {
 		t.Errorf("expected one error")

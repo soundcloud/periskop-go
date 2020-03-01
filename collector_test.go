@@ -5,11 +5,11 @@ import (
 	"testing"
 )
 
-func getErrorAggregate(aggregatedErrors map[string]*AggregatedError) *AggregatedError {
+func getErrorAggregate(aggregatedErrors map[string]*aggregatedError) *aggregatedError {
 	for _, aggregatedError := range aggregatedErrors {
 		return aggregatedError
 	}
-	return &AggregatedError{}
+	return &aggregatedError{}
 }
 
 func TestCollector_addError(t *testing.T) {

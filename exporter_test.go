@@ -31,8 +31,8 @@ func compareJSON(json0, json1 string) (bool, error) {
 func TestExporter_Export(t *testing.T) {
 	c := NewErrorCollector()
 	uuid, _ := uuid.Parse("5d9893c6-51d6-11ea-8aad-f894c260afe5")
-	errorWithContext := ErrorWithContext{
-		Error: ErrorInstance{
+	errWithContext := errorWithContext{
+		Error: errorInstance{
 			Cause:      errors.New("testing").Error(),
 			Class:      errors.New("testing").Error(),
 			Stacktrace: []string{"line 12:", "syntax error"},
@@ -47,11 +47,11 @@ func TestExporter_Export(t *testing.T) {
 		},
 	}
 
-	errorAggregate := AggregatedError{
+	errorAggregate := aggregatedError{
 		AggregationKey: "test",
 		TotalCount:     1,
 		Severity:       SeverityError,
-		LatestErrors:   []ErrorWithContext{errorWithContext},
+		LatestErrors:   []errorWithContext{errWithContext},
 	}
 	var expected = `{
 		"aggregated_errors":[
