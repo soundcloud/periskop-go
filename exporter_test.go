@@ -1,13 +1,13 @@
-package main
+package periskop
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"reflect"
 	"testing"
 	"time"
 
-	"github.com/go-errors/errors"
 	"github.com/google/uuid"
 )
 
@@ -33,8 +33,8 @@ func TestExporter_Export(t *testing.T) {
 	uuid, _ := uuid.Parse("5d9893c6-51d6-11ea-8aad-f894c260afe5")
 	errorWithContext := ErrorWithContext{
 		Error: ErrorInstance{
-			Cause:      errors.New("testing").Err.Error(),
-			Class:      errors.New("testing").Err.Error(),
+			Cause:      errors.New("testing").Error(),
+			Class:      errors.New("testing").Error(),
 			Stacktrace: []string{"line 12:", "syntax error"},
 		},
 		UUID:      uuid,
@@ -97,6 +97,6 @@ func TestExporter_Export(t *testing.T) {
 		t.Errorf("error exporting exceptions: %v", err)
 	}
 	if !areEqual {
-		t.Error(fmt.Sprintf("Data did not match:\nExpected: %s\nGot: %s", expected, data))
+		t.Errorf("data did not match:\nexpected: %s\ngot: %s", expected, data))
 	}
 }

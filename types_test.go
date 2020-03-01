@@ -1,9 +1,8 @@
-package main
+package periskop
 
 import (
+	"errors"
 	"testing"
-
-	"github.com/go-errors/errors"
 )
 
 var aggregationKeyCases = []struct {

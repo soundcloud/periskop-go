@@ -1,4 +1,4 @@
-package stackframes
+package errutils
 
 import (
 	"reflect"

@@ -1,10 +1,10 @@
-package main
+package periskop
 
 import (
 	"fmt"
 	"strings"
 
-	"github.com/soundcloud/periskop-go/stackframes"
+	"github.com/soundcloud/periskop-go/errutils"
 )
 
 // ErrorCollector collects all the aggregated errors
@@ -29,14 +29,10 @@ func (c *ErrorCollector) ReportWithContext(err error, httpCtx HTTPContext) {
 	c.addError(err, httpCtx)
 }
 
-//func removeHexFromStack(stack []byte)
-
 func getStackTrace(err error) []string {
-	e := stackframes.New(err)
+	e := errutils.New(err)
 	trace := string(e.Stack())
-	//fmt.Println(e.StackFrames())
 	s := strings.Split(trace, "\n")
-	//fmt.Println(s)
 	return s
 }
 

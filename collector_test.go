@@ -1,9 +1,8 @@
-package main
+package periskop
 
 import (
+	"errors"
 	"testing"
-
-	"github.com/go-errors/errors"
 )
 
 func getErrorAggregate(aggregatedErrors map[string]*AggregatedError) *AggregatedError {
@@ -31,14 +30,14 @@ func TestCollector_addError(t *testing.T) {
 func TestCollector_Report(t *testing.T) {
 	c := NewErrorCollector()
 	err := errors.New("testing")
-	c.Report(err.Err)
+	c.Report(err)
 
 	if len(c.aggregatedErrors) != 1 {
 		t.Errorf("expected one element")
 	}
 
 	errorWithContext := getErrorAggregate(c.aggregatedErrors).LatestErrors[0]
-	if errorWithContext.Error.Cause != err.Err.Error() {
+	if errorWithContext.Error.Cause != err.Error() {
 		t.Errorf("expected a propagated error")
 	}
 
@@ -55,7 +54,7 @@ func TestCollector_ReportWithContext(t *testing.T) {
 		RequestURL:     "http://example.com",
 		RequestHeaders: map[string]string{"Cache-Control": "no-cache"},
 	}
-	c.ReportWithContext(err.Err, httpContext)
+	c.ReportWithContext(err, httpContext)
 
 	if len(c.aggregatedErrors) != 1 {
 		t.Errorf("expected one element")

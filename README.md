@@ -7,30 +7,37 @@ Go client for Periskop
 ```go
 package main
 
-func faultJsonParsing() error {
-    var dat map[string]interface{}
-    // will return "unexpected end of JSON input"
-	return json.Unmarshal([]byte(`{"num":`), &dat)
+import (
+	"encoding/json"
+	"net/http"
+
+	"github.com/soundcloud/periskop-go"
+)
+
+func faultyJSONParser() error {
+	var dat map[string]interface{}
+	// will return "unexpected end of JSON input"
+	return json.Unmarshal([]byte(`{"id":`), &dat)
 }
 
 func main() {
-    c := NewErrorCollector()
+	c := periskop.NewErrorCollector()
 
-    // Without context
-    c.Report(faultJsonParsing())
-    
-    // With HTTP context
-	c.ReportWithContext(faultJsonParsing(), HTTPContext{
+	// Without context
+	c.Report(faultyJSONParser())
+
+	// With HTTP context
+	c.ReportWithContext(faultyJSONParser(), periskop.HTTPContext{
 		RequestMethod:  "GET",
 		RequestURL:     "http://example.com",
 		RequestHeaders: map[string]string{"Cache-Control": "no-cache"},
-    })
-    
-    // Call the exporter and HTTP handler to expose the 
-    // errors in /exceptions endpoints
-	e := NewErrorExporter(&c)
-	h := NewHandler(e)
+	})
+
+	// Call the exporter and HTTP handler to expose the
+	// errors in /exceptions endpoints
+	e := periskop.NewErrorExporter(&c)
+	h := periskop.NewHandler(e)
 	http.Handle("/exceptions", h)
 	http.ListenAndServe(":8080", nil)
-}
+
 ```

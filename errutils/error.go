@@ -43,7 +43,7 @@
 // This package was original written to allow reporting to Bugsnag,
 // but after I found similar packages by Facebook and Dropbox, it
 // was moved to one canonical location so everyone can benefit.
-package stackframes
+package errutils
 
 import (
 	"bytes"
