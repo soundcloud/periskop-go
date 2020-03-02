@@ -1,8 +1,17 @@
 # periskop-go
-Go client for Periskop
 
-## Usage example
+[Periskop](https://github.com/soundcloud/periskop) requires collecting and aggregating exceptions on the client side,
+as well as exposing them via an HTTP endpoint using a well defined format.
 
+This library provides low level collection and rendering capabilities
+
+## Usage
+
+```
+go get github.com/soundcloud/periskop-go
+```
+
+### Example
 
 ```go
 package main
@@ -41,3 +50,7 @@ func main() {
 	http.ListenAndServe(":8080", nil)
 }
 ```
+
+## Contributing
+
+Please see [CONTRIBUTING.md](CONTRIBUTING.md)
