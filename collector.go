@@ -2,20 +2,19 @@ package periskop
 
 import (
 	"strings"
+	"sync"
 
 	"github.com/soundcloud/periskop-go/errutils"
 )
 
 // ErrorCollector collects all the aggregated errors
 type ErrorCollector struct {
-	aggregatedErrors map[string]*aggregatedError
+	aggregatedErrors sync.Map
 }
 
 // NewErrorCollector creates new ErrorCollector
 func NewErrorCollector() ErrorCollector {
-	return ErrorCollector{
-		aggregatedErrors: make(map[string]*aggregatedError),
-	}
+	return ErrorCollector{}
 }
 
 // Report is used to add an error to map of aggregated errors
@@ -37,9 +36,10 @@ func getStackTrace(err error) []string {
 
 func (c *ErrorCollector) getAggregatedErrors() payload {
 	aggregatedErrors := make([]aggregatedError, 0)
-	for _, aggregateError := range c.aggregatedErrors {
-		aggregatedErrors = append(aggregatedErrors, *aggregateError)
-	}
+	c.aggregatedErrors.Range(func(key, value interface{}) bool {
+		aggregatedErrors = append(aggregatedErrors, value.(aggregatedError))
+		return true
+	})
 	return payload{aggregatedErrors}
 }
 
@@ -47,11 +47,12 @@ func (c *ErrorCollector) addError(err error, httpCtx HTTPContext) {
 	errorInstance := newErrorInstance(err, getStackTrace(err))
 	errorWithContext := newErrorWithContext(errorInstance, SeverityError, httpCtx)
 	aggregationKey := errorWithContext.aggregationKey()
-	if aggregatedError, ok := c.aggregatedErrors[aggregationKey]; ok {
-		aggregatedError.addError(errorWithContext)
+	if aggregatedErr, ok := c.aggregatedErrors.Load(aggregationKey); ok {
+		aggregatedErr, _ := aggregatedErr.(aggregatedError)
+		aggregatedErr.addError(errorWithContext)
 	} else {
-		aggregatedError := newErrorAggregate(aggregationKey, SeverityError)
-		aggregatedError.addError(errorWithContext)
-		c.aggregatedErrors[aggregationKey] = &aggregatedError
+		aggregatedErr := newErrorAggregate(aggregationKey, SeverityError)
+		aggregatedErr.addError(errorWithContext)
+		c.aggregatedErrors.Store(aggregationKey, &aggregatedErr)
 	}
 }

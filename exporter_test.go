@@ -85,7 +85,7 @@ func TestExporter_Export(t *testing.T) {
 		  }
 		]
 	  }`
-	c.aggregatedErrors["test"] = &errorAggregate
+	c.aggregatedErrors.Store("test", &errorAggregate)
 	e := NewErrorExporter(&c)
 	data, err := e.Export()
 	if err != nil {
