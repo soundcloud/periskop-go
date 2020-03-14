@@ -9,8 +9,7 @@ import (
 func getErrorAggregate(aggregatedErrors sync.Map) *aggregatedError {
 	aggregatedErr := &aggregatedError{}
 	aggregatedErrors.Range(func(key, value interface{}) bool {
-		aggErr, _ := value.(aggregatedError)
-		aggregatedErr = &aggErr
+		aggregatedErr, _ = value.(*aggregatedError)
 		return false
 	})
 	return aggregatedErr

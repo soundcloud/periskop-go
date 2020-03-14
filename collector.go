@@ -37,7 +37,8 @@ func getStackTrace(err error) []string {
 func (c *ErrorCollector) getAggregatedErrors() payload {
 	aggregatedErrors := make([]aggregatedError, 0)
 	c.aggregatedErrors.Range(func(key, value interface{}) bool {
-		aggregatedErrors = append(aggregatedErrors, value.(aggregatedError))
+		aggregatedErr, _ := value.(aggregatedError)
+		aggregatedErrors = append(aggregatedErrors, aggregatedErr)
 		return true
 	})
 	return payload{aggregatedErrors}
@@ -48,7 +49,7 @@ func (c *ErrorCollector) addError(err error, httpCtx HTTPContext) {
 	errorWithContext := newErrorWithContext(errorInstance, SeverityError, httpCtx)
 	aggregationKey := errorWithContext.aggregationKey()
 	if aggregatedErr, ok := c.aggregatedErrors.Load(aggregationKey); ok {
-		aggregatedErr, _ := aggregatedErr.(aggregatedError)
+		aggregatedErr, _ := aggregatedErr.(*aggregatedError)
 		aggregatedErr.addError(errorWithContext)
 	} else {
 		aggregatedErr := newErrorAggregate(aggregationKey, SeverityError)

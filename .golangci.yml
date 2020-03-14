@@ -13,3 +13,4 @@ issues:
       - funlen
       - scopelint
       - gochecknoglobals
+      - govet
